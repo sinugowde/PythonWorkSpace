@@ -1,5 +1,8 @@
 import socket
 import _thread
+from wsgiref.handlers import format_date_time
+from datetime import datetime
+from time import mktime
 
 dataFormat = {}
 
@@ -8,40 +11,75 @@ class HTTPServer:
 
     def __init__(self):
         # self.request = request.decode(encoding='utf-8')
-        self.request = ''
+        self.request = {}
+        self.response = {}
         self.methodMapping = {"GET": self.parseGet, "PUT": self.parsePut, "HEAD": self.parseHead,
                               "POST": self.parsePost}
 
     def set_request(self, request):
         self.request = request.decode(encoding='utf-8')
 
-    def parseGet(self, data):
-        requestLine = data['requestLine'].split(" ")
-        method = requestLine[0]
-        uri = requestLine[1]
-        version = requestLine[2]
+    def print_request(self):
+        print("decodedData:\n")
+        for key, value in self.request.items():
+            print("{}: {}".format(key, value))
+        print('\n')
 
-        if uri == "/":
-            uri += "index.html"
+    def generate_date_time_stamp(self):
+        now = datetime.now()
+        stamp = mktime(now.timetuple())
+        return 'Date: ' + format_date_time(stamp)
 
-        print("method: {}\turi: {}\tversion: {}".format(method, uri, version))
-        return self.prepareResponse(data, method, uri, version)
+    def web_page(self):
+        if (self.request['requestLine'])['uri'] == '/':
+            content = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; " \
+                      "charset=utf-8\"></head><body><h1>Aricent Web Server</h1>" \
+                      "<h2>Welcome to our Web Page</h2></body></html>"
+        return content
 
-    def prepareResponse(self, data, method, uri, version):
-        response = "HTTP/1.1 200 OK\nServer: MKSERVER\n\n<!DOCTYPE html>\n<html><h1><br>Aricent Web Server </br><br>Method: "+method+"\n</br><br>uri: "+uri+"\n</br><br>Version: "+version+"<br></h1></html>"
-        method = (data['requestLine'].split(" "))[0]
-        uri = (data['requestLine'].split(" "))[1]
-        version = (data['requestLine'].split(" "))[2]
-        
-        filepath = 'webpages' + uri
-        res = ''
-        with open(filepath, 'r') as f:
-            res = f.read()
-        res = res.replace("method", (data['requestLine'].split(" "))[0])
-        res = res.replace("headerData", data['header'])
-        res = "HTTP/1.1 200 OK\n\n" + res
-        f.close()
-        return response
+    def method_not_implemented(self):
+        status_line = (self.request['requestLine'])['http_ver'] + " 501 Not Implemented"
+        self.response['message-body'] = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; " \
+                                   "charset=utf-8\"></head><body><h2>Aricent Web Server</h2><div>501 - " \
+                                   "Not Implemented</div></body></html>"
+        self.response['general-header'] = 'Date: ' + self.generate_date_time_stamp()
+        # self.response['general-header'] = self.response[
+        #                                  'general-header'] + '\r\nConnection: close' + '\r\nContent-Type: text/html'
+        print("response-1: {}".format(self.response))
+        return self.prepareResponse()
+
+    def parseGet(self):
+
+        request_line = self.request['requestLine']
+
+        self.response['status-line'] = request_line['http_ver'] + ' '
+        self.response['general-header'] = self.generate_date_time_stamp()
+
+        if request_line['uri'] == "/":
+            self.response['status-line'] += '200 OK'
+            self.response['message-body'] = self.web_page()
+
+        print("Response: {}".format(self.response) + '\n')
+
+        return self.prepareResponse()
+
+    def prepareResponse(self):
+        response_string = ''
+        response_format = ['status-line', 'general-header', 'response-header', 'entity-header', 'message-body']
+        print("prepare_response: {}".format(self.response))
+        self.response['general-header'] += '\r\nConnection: close'
+        self.response['general-header'] += '\r\nContent-Type: text/html'
+
+        for item in response_format:
+            if item in self.response:
+                if response_string == '':
+                    response_string = self.response[item] + '\r\n'
+                elif item == 'message-body':
+                    response_string = response_string + '\r\n' + self.response[item] + '\r\n'
+                else:
+                    response_string = response_string + self.response[item] + '\r\n'
+        print("response_string: {}".format(response_string))
+        return response_string
 
     def parsePut(self, data):
         print("Received Put request\n")
@@ -87,9 +125,16 @@ class HTTPServer:
         writeFd = open(filename, 'w')
         writeFd.write(postReq['msgBody'])
 
-    def methodToRun(self, methodToCall, decodeData):
-        print("method to run\n")
-        return methodToCall(decodeData)
+    def methodToRun(self):
+        print("Method to Run\n")
+        print(self.request)
+        print(type(self.request))
+        print((self.request['requestLine'])['method'])
+        try:
+            methodToCall = self.methodMapping[(self.request['requestLine'])['method']]
+        except:
+            methodToCall = self.method_not_implemented
+        return methodToCall()
 
     def parseRequest(self):
         decodedData = self.decodeRequest()
@@ -107,14 +152,14 @@ class HTTPServer:
             header_dictionary[(line.split(':', maxsplit=1))[0]] = ((line.split(':', maxsplit=1))[1]).strip()
         decodedData['header'] = header_dictionary
 
-        print("decodedData:\n")
-        for key, value in decodedData.items():
-            print("{}: {}".format(key, value))
-        print('\n')
+        self.request = ''
+        self.request = decodedData
+        self.print_request()
+
         responseData = ''
         # method = (decodedData['requestLine'].split(" "))[0]
         # responseData = self.methodToRun(self.methodMapping[method], decodedData)
-        return responseData
+        # return responseData
         
     def decodeRequest(self):
         data = {}
@@ -155,10 +200,11 @@ def threaded_client(client_socket, server_instance):
             client_socket.close()
             break
 
+        # response = ''
         server_instance.set_request(request)
-        response = server_instance.parseRequest()
+        server_instance.parseRequest()
+        response = server_instance.methodToRun()
         print("Sending Response: ")
-        #response = 'HTTP/1.1 200 OK\n'
         client_connection.sendall(response.encode(encoding='utf-8'))
         client_connection.close()
 
