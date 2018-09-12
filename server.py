@@ -1,14 +1,19 @@
 import socket
+import _thread
 
 dataFormat = {}
 
 
 class HTTPServer:
 
-    def __init__(self, request):
-        self.request = request.decode(encoding='utf-8')
+    def __init__(self):
+        # self.request = request.decode(encoding='utf-8')
+        self.request = ''
         self.methodMapping = {"GET": self.parseGet, "PUT": self.parsePut, "HEAD": self.parseHead,
                               "POST": self.parsePost}
+
+    def set_request(self, request):
+        self.request = request.decode(encoding='utf-8')
 
     def parseGet(self, data):
         requestLine = data['requestLine'].split(" ")
@@ -89,9 +94,26 @@ class HTTPServer:
     def parseRequest(self):
         decodedData = self.decodeRequest()
 
+        request_dictionary = {}
+        request_line = decodedData['requestLine'].split()
+        request_dictionary['method'] = request_line[0]
+        request_dictionary['uri'] = request_line[1]
+        request_dictionary['http_ver'] = request_line[2]
+        decodedData['requestLine'] = request_dictionary
+
+        header_dictionary = {}
+        header_data = decodedData['header'].splitlines()
+        for line in header_data:
+            header_dictionary[(line.split(':', maxsplit=1))[0]] = ((line.split(':', maxsplit=1))[1]).strip()
+        decodedData['header'] = header_dictionary
+
+        print("decodedData:\n")
+        for key, value in decodedData.items():
+            print("{}: {}".format(key, value))
+        print('\n')
         responseData = ''
-        method = (decodedData['requestLine'].split(" "))[0]
-        responseData = self.methodToRun(self.methodMapping[method], decodedData)
+        # method = (decodedData['requestLine'].split(" "))[0]
+        # responseData = self.methodToRun(self.methodMapping[method], decodedData)
         return responseData
         
     def decodeRequest(self):
@@ -101,16 +123,47 @@ class HTTPServer:
         data['requestLine'] = self.request[0:reqIndex]
 
         hdrIndex = self.request.find('\r\n\r\n')
-        data['header'] = self.request[reqIndex+2 : hdrIndex]
+        data['header'] = self.request[reqIndex+2:hdrIndex]
 
         msgBdyIndex = hdrIndex + 4
-        data['msgBody'] = self.request[msgBdyIndex : len(self.request)]
+        data['msgBody'] = self.request[msgBdyIndex:len(self.request)]
 
-        print("DATA: {}".format(data))
+        print("DATA: {}".format(data) + '\n')
 
         return data
 
 
+def threaded_client(client_socket, server_instance):
+
+    while True:
+        try:
+            request = client_connection.recv(1024)
+        except ConnectionResetError:
+            print("*** Connection Closed ***")
+            client_socket.close()
+            break
+        except:
+            print("*** Connection is Broken ***")
+            client_socket.close()
+            break
+
+        print("Data received from client: {}".format(request))
+
+        if not request:
+            print("\n**NO DATA PRESENT**\n")
+            print("*** closing the Connection ***")
+            client_socket.close()
+            break
+
+        server_instance.set_request(request)
+        response = server_instance.parseRequest()
+        print("Sending Response: ")
+        #response = 'HTTP/1.1 200 OK\n'
+        client_connection.sendall(response.encode(encoding='utf-8'))
+        client_connection.close()
+
+
+# main function start hear
 HOST, PORT = '', 8888
 
 listen_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -121,14 +174,7 @@ print('Serving HTTP on port {} ...'.format(PORT))
 
 while True:
     client_connection, client_address = listen_socket.accept()
-    request = client_connection.recv(1024)
-    print(request)
-    print("\n\n")
-    server = HTTPServer(request)
-    response = server.parseRequest()
-    #print(response)
-    print("sending response")
-    #response = 'HTTP/1.1 200 OK\n'
-    client_connection.sendall(response)
-    client_connection.close()
+    print("Connected to: {} : {}".format(client_address[0], client_address[1]))
+    server = HTTPServer()
+    _thread.start_new_thread(threaded_client, (client_connection, server))
 
