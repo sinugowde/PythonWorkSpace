@@ -20,9 +20,9 @@ class HTTPServer:
         self.request = request.decode(encoding='utf-8')
 
     def print_request(self):
-        print("decodedData:\n")
+        print("decodedData:")
         for key, value in self.request.items():
-            print("{}: {}".format(key, value))
+            print("{:<12}: {:<}".format(key, str(value)))
         print('\n')
 
     def generate_date_time_stamp(self):
@@ -38,21 +38,19 @@ class HTTPServer:
         return content
 
     def method_not_implemented(self):
-        status_line = (self.request['requestLine'])['http_ver'] + " 501 Not Implemented"
+        status_line = (self.request['requestLine'])['http-ver'] + " 501 Not Implemented"
+        self.response['status-line'] = status_line
         self.response['message-body'] = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; " \
-                                   "charset=utf-8\"></head><body><h2>Aricent Web Server</h2><div>501 - " \
-                                   "Not Implemented</div></body></html>"
+                                        "charset=utf-8\"></head><body><h2>Aricent Web Server</h2><div>501 - " \
+                                        "Not Implemented</div></body></html>"
         self.response['general-header'] = 'Date: ' + self.generate_date_time_stamp()
-        # self.response['general-header'] = self.response[
-        #                                  'general-header'] + '\r\nConnection: close' + '\r\nContent-Type: text/html'
-        print("response-1: {}".format(self.response))
         return self.prepareResponse()
 
     def parseGet(self):
-
+        print(*"Received GET request\n")
         request_line = self.request['requestLine']
 
-        self.response['status-line'] = request_line['http_ver'] + ' '
+        self.response['status-line'] = request_line['http-ver'] + ' '
         self.response['general-header'] = self.generate_date_time_stamp()
 
         if request_line['uri'] == "/":
@@ -75,19 +73,20 @@ class HTTPServer:
                 if response_string == '':
                     response_string = self.response[item] + '\r\n'
                 elif item == 'message-body':
-                    response_string = response_string + '\r\n' + self.response[item] + '\r\n'
+                    if (self.request['requestLine'])['method'] is not 'HEAD':
+                        response_string = response_string + '\r\n' + self.response[item] + '\r\n'
                 else:
                     response_string = response_string + self.response[item] + '\r\n'
         print("response_string: {}".format(response_string))
         return response_string
 
-    def parsePut(self, data):
-        print("Received Put request\n")
+    def parsePut(self):
+        print(*"Received PUT request\n")
         pass
 
-    def parseHead(self, data):
-        print("Received Head request\n")
-        pass
+    def parseHead(self):
+        print(*"Received HEAD request\n")
+        return self.parseGet()
 
     '''
     Serving HTTP on port 8888 ...
@@ -108,28 +107,27 @@ class HTTPServer:
     ProjectName = WebServer Implementation
     '''
 
-    def parsePost(self, postReq):
-        print(*"Received Post request\n")
-        print(postReq)
+    def parsePost(self):
+        print(*"Received POST request")
 
-        for v in postReq['header'].splitlines():
-            if 'content-length' in v:
-                conLen = v.split(":")[1]
+        print(self.request)
+        uri = (self.request['requestLine'])['uri']
+        print('uri: {}'.format(uri))
+        print('replace: {}'.format(uri.replace('http://localhost:8888/', '')))
 
-        if int(conLen) == len(postReq['msgBody']):
-           print("full msg body received")
 
-        requestLine = postReq['requestLine'].split(" ")
-        uri = requestLine[1]
-        filename = 'webpages' + uri
-        writeFd = open(filename, 'w')
-        writeFd.write(postReq['msgBody'])
+        # if int(conLen) == len(postReq['msgBody']):
+        #    print("full msg body received")
+        #
+        # requestLine = postReq['requestLine'].split(" ")
+        # uri = requestLine[1]
+        # filename = 'webpages' + uri
+        # writeFd = open(filename, 'w')
+        # writeFd.write(postReq['msgBody'])
 
     def methodToRun(self):
-        print("Method to Run\n")
-        print(self.request)
-        print(type(self.request))
-        print((self.request['requestLine'])['method'])
+        print("Method to Run: {}".format((self.request['requestLine'])['method']))
+
         try:
             methodToCall = self.methodMapping[(self.request['requestLine'])['method']]
         except:
@@ -143,7 +141,7 @@ class HTTPServer:
         request_line = decodedData['requestLine'].split()
         request_dictionary['method'] = request_line[0]
         request_dictionary['uri'] = request_line[1]
-        request_dictionary['http_ver'] = request_line[2]
+        request_dictionary['http-ver'] = request_line[2]
         decodedData['requestLine'] = request_dictionary
 
         header_dictionary = {}
@@ -156,11 +154,6 @@ class HTTPServer:
         self.request = decodedData
         self.print_request()
 
-        responseData = ''
-        # method = (decodedData['requestLine'].split(" "))[0]
-        # responseData = self.methodToRun(self.methodMapping[method], decodedData)
-        # return responseData
-        
     def decodeRequest(self):
         data = {}
 
@@ -172,8 +165,6 @@ class HTTPServer:
 
         msgBdyIndex = hdrIndex + 4
         data['msgBody'] = self.request[msgBdyIndex:len(self.request)]
-
-        print("DATA: {}".format(data) + '\n')
 
         return data
 
@@ -204,7 +195,7 @@ def threaded_client(client_socket, server_instance):
         server_instance.set_request(request)
         server_instance.parseRequest()
         response = server_instance.methodToRun()
-        print("Sending Response: ")
+        print("Sending Response: \n")
         client_connection.sendall(response.encode(encoding='utf-8'))
         client_connection.close()
 
