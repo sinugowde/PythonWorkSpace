@@ -1,71 +1,56 @@
 import json
+import os
 
-
-people_string = '''
-{
-    "people": [
-    {
-        "name": "John Smith",
-        "phone": "615-555-7164",
-        "emails": ["johnsmith@bogusemail.com", "john.smith@work-place.com"],
-        "has_license": false
-    },
-    {
-        "name": Jane Doe",
-        "phone": "560-555-5153",
-        "emails": null,
-        "has_license": true
-    }]
+dict = {'two': 2}
+datastore = {"office": {
+    "medical": [
+      { "room-number": 100,
+        "use": "reception",
+        "sq-ft": 50,
+        "price": 75
+      },
+      { "room-number": 101,
+        "use": "waiting",
+        "sq-ft": 250,
+        "price": 75
+      },
+      { "room-number": 102,
+        "use": "examination",
+        "sq-ft": 125,
+        "price": 150
+      },
+      { "room-number": 103,
+        "use": "examination",
+        "sq-ft": 125,
+        "price": 150
+      },
+      { "room-number": 104,
+        "use": "office",
+        "sq-ft": 150,
+        "price": 100
+      }
+    ],
+    "parking": {
+      "location": "premium",
+      "style": "covered",
+      "price": 750
+    }
+  }
 }
-'''
 
-json_data = [
-  {
-    "userId": 1,
-    "id": 1,
-    "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
-    "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
-  },
-  {
-    "userId": 1,
-    "id": 2,
-    "title": "qui est esse",
-    "body": "est rerum tempore vitae\nsequi sint nihil reprehenderit dolor beatae ea dolores neque\nfugiat blanditiis voluptate porro vel nihil molestiae ut reiciendis\nqui aperiam non debitis possimus qui neque nisi nulla"
-  },
-  {
-    "userId": 1,
-    "id": 3,
-    "title": "ea molestias quasi exercitationem repellat qui ipsa sit aut",
-    "body": "et iusto sed quo iure\nvoluptatem occaecati omnis eligendi aut ad\nvoluptatem doloribus vel accusantium quis pariatur\nmolestiae porro eius odio et labore et velit aut"
-  },
-  {
-    "userId": 1,
-    "id": 4,
-    "title": "eum et est occaecati",
-    "body": "ullam et saepe reiciendis voluptatem adipisci\nsit amet autem assumenda provident rerum culpa\nquis hic commodi nesciunt rem tenetur doloremque ipsam iure\nquis sunt voluptatem rerum illo velit"
-  },
-  {
-    "userId": 1,
-    "id": 5,
-    "title": "nesciunt quas odio",
-    "body": "repudiandae veniam quaerat sunt sed\nalias aut fugiat sit autem sed est\nvoluptatem omnis possimus esse voluptatibus quis\nest aut tenetur dolor neque"
-  }]
-
-# print(json_data)
-# print(type(json_data))
-str = {'one': 1}
-# json_data = {}
-# json_data['data'] = []
-# json_data['data'].append(str)
-# with open('data.json', 'w+') as data_file:
-#     json.dump(json_data, data_file)
+if os.stat('data.json').st_size == 0:
+    json_data = []
+json_data.append(datastore)
+with open('data.json', 'w') as data_file:
+    json.dump(json_data, data_file, indent=4)
+    # json.dump(data_file, json_data, indent=4)
 
 with open('data.json', 'r') as data_file:
-    file_output = json.load(data_file)
-print(file_output[0])
-print(type(file_output[0]))
+    json_data = json.load(data_file)
+    # print(json_data)
 
-if 'id' in file_output[0].keys():
-    print('found it')
-else:
-    print('not there')
+with open('data.json', 'w') as data_file:
+    json_data.append(dict)
+    json.dump(json_data, data_file, indent=4)
+
+print("json_data[0]: {}\njson_data[1]: {}\n".format(json_data[0], json_data[1]))
