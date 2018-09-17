@@ -135,6 +135,8 @@ class HTTPServer:
         if datum not in json_data:
             json_data.append(datum)
 
+        self.response['general-header'] += '\r\nLocation: http://localhost:5555/' + str(json_data.index(datum)+1)
+
         with open('data.json', 'w') as data_file:
             json.dump(json_data, data_file, indent=4)
 
@@ -153,7 +155,6 @@ class HTTPServer:
 
         if uri is '/':
             self.response['status-line'] += '201 Created'
-            self.response['general-header'] += '\r\nLocation: http://localhost:5555/'
             self.response['message-body'] = json.dumps(self.prepare_post_data(), indent=4)
         else:
             self.response['status-line'] += '404 Not Found'
