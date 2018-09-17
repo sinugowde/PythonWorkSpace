@@ -5,6 +5,7 @@ from wsgiref.handlers import format_date_time
 from datetime import datetime
 from time import mktime
 import json
+import re
 
 dataFormat = {}
 
@@ -48,6 +49,19 @@ class HTTPServer:
         self.response['general-header'] = 'Date: ' + self.generate_date_time_stamp()
         return self.prepareResponse()
 
+    def check_for_index(self, index):
+        if os.stat('data.json').st_size == 0:
+            json_data = []
+        else:
+            with open('data.json', 'r') as data_file:
+                json_data = json.load(data_file)
+        if len(json_data) >= index:
+            self.response['status-line'] += '200 OK'
+            self.response['message-body'] = json.dumps(json_data[index - 1])
+        else:
+            self.response['status-line'] += '404 NOT FOUND'
+        return
+
     def parseGet(self):
         print(*"Received GET request\n")
         request_line = self.request['requestLine']
@@ -58,6 +72,8 @@ class HTTPServer:
         if request_line['uri'] == "/":
             self.response['status-line'] += '200 OK'
             self.response['message-body'] = self.web_page()
+        elif re.findall(r"/post/\d+", request_line['uri']):
+            self.check_for_index(int((request_line['uri'].strip('/')).split('/')[1]))
         else:
             self.response['status-line'] += '404 NOT FOUND'
         self.response['general-header'] += '\r\nConnection: close'
@@ -91,25 +107,6 @@ class HTTPServer:
     def parseHead(self):
         print(*"Received HEAD request\n")
         return self.parseGet()
-
-    '''
-    Serving HTTP on port 8888 ...
-    POST /testpost.html HTTP/1.1
-
-    HOST: localhost:8888
-
-    content-type: text/plain
-
-    content-length: 96
-
-    
-
-    Title = Aricent Certification program
-
-    language = Python
-
-    ProjectName = WebServer Implementation
-    '''
 
     def prepare_post_data(self):
 
@@ -219,11 +216,11 @@ def threaded_client(client_socket, server_instance):
         try:
             request = client_connection.recv(1024)
         except ConnectionResetError:
-            print("*** Connection Closed ***")
+            print("*** Connection Closed ***\n")
             client_socket.close()
             break
         except:
-            print("*** Connection is Broken ***")
+            print("*** Connection is Broken ***\n")
             client_socket.close()
             break
 
@@ -231,7 +228,7 @@ def threaded_client(client_socket, server_instance):
 
         if not request:
             print("\n**NO DATA PRESENT**\n")
-            print("*** closing the Connection ***")
+            print("*** closing the Connection ***\n")
             client_socket.close()
             break
 
@@ -239,7 +236,7 @@ def threaded_client(client_socket, server_instance):
         server_instance.set_request(request)
         server_instance.parseRequest()
         response = server_instance.methodToRun()
-        print("\nSending Response: {}\n".format(response))
+        print("\nSending Response:\n{}\n".format(response))
         client_connection.sendall(response.encode(encoding='utf-8'))
         client_connection.close()
 
