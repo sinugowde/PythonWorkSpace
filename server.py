@@ -96,7 +96,7 @@ class HTTPServer:
                 if response_string == '':
                     response_string = self.response[item] + '\r\n'
                 elif item == 'message-body':
-                    if (self.request['requestLine'])['method'] is not 'HEAD':
+                    if (self.request['requestLine'])['method'] != 'HEAD':
                         response_string = response_string + '\r\n' + self.response[item] + '\r\n'
                 else:
                     response_string = response_string + self.response[item] + '\r\n'
