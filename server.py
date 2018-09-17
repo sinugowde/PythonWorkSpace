@@ -18,15 +18,18 @@ class HTTPServer:
         self.response = {}
         self.methodMapping = {"GET": self.parseGet, "PUT": self.parsePut, "HEAD": self.parseHead,
                               "POST": self.parsePost}
+        return
 
     def set_request(self, request):
         self.request = request.decode(encoding='utf-8')
+        return
 
     def print_request(self):
         print("decodedData:")
         for key, value in self.request.items():
             print("{:<12}: {:<}".format(key, str(value)))
         print('\n')
+        return
 
     def generate_date_time_stamp(self):
         now = datetime.now()
@@ -194,6 +197,7 @@ class HTTPServer:
         self.request = ''
         self.request = decodedData
         self.print_request()
+        return
 
     def decodeRequest(self):
         data = {}
