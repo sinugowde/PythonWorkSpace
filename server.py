@@ -153,7 +153,7 @@ class HTTPServer:
         self.response['status-line'] = request_line['http-ver'] + ' '
         self.response['general-header'] = self.generate_date_time_stamp()
 
-        if uri is '/':
+        if uri == '/post':
             self.response['status-line'] += '201 Created'
             self.response['message-body'] = json.dumps(self.prepare_post_data(), indent=4)
         else:
