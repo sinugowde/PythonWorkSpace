@@ -58,9 +58,12 @@ class HTTPServer:
         else:
             with open('data.json', 'r') as data_file:
                 json_data = json.load(data_file)
-        if len(json_data) >= index:
+        if index == 'all':
             self.response['status-line'] += '200 OK'
-            self.response['message-body'] = json.dumps(json_data[index - 1])
+            self.response['message-body'] = json.dumps(json_data, indent=4)
+        elif len(json_data) >= index:
+            self.response['status-line'] += '200 OK'
+            self.response['message-body'] = json.dumps(json_data[index - 1], indent=4)
         else:
             self.response['status-line'] += '404 NOT FOUND'
         return
@@ -77,6 +80,8 @@ class HTTPServer:
             self.response['message-body'] = self.web_page()
         elif re.findall(r"/post/\d+", request_line['uri']):
             self.check_for_index(int((request_line['uri'].strip('/')).split('/')[1]))
+        elif request_line['uri'] == '/post/' or request_line['uri'] == '/post':
+            self.check_for_index('all')
         else:
             self.response['status-line'] += '404 NOT FOUND'
         self.response['general-header'] += '\r\nConnection: close'
