@@ -131,9 +131,12 @@ class HTTPServer:
 
         if 'text/csv' in header['Content-Type'] or 'application/x-www-form-urlencoded' in header['Content-Type']:
             message_body = re.findall(r'([\w\s]+=[\w\s]+)', message_body)
+            print("prepare_post_data:message_body:: {}\n".format(message_body))
+
             if message_body:
                 for i in range(0, len(message_body), 2):
-                    datum[(message_body[i].split('='))[1]] = (message_body[i].split('='))[i+1]
+                    datum[(message_body[i].split('='))[1]] = (message_body[i+1].split('='))[1]
+                    print("prepare_post_data:datum[{}]: {}".format(i, datum))
             else:
                 self.response['status-line'] = (self.request['requestLine'])['http-ver'] + ' 500 Internal Server Error'
         elif 'application/json' in header['Content-Type']:
