@@ -1,0 +1,282 @@
+cmd: curl -x 127.0.0.1:8888 -k --data "title=Hello&body=Hello World" https://jsonplaceholder.typicode.com/posts/
+
+POST https://jsonplaceholder.typicode.com/posts/ HTTP/1.1
+Host: jsonplaceholder.typicode.com
+User-Agent: curl/7.60.0
+Accept: */*
+Content-Length: 28
+Content-Type: application/x-www-form-urlencoded
+
+title=Hello&body=Hello World
+-----
+response:
+HTTP/1.1 201 Created
+Date: Mon, 10 Sep 2018 16:39:29 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 60
+Connection: keep-alive
+Set-Cookie: __cfduid=d2b6917f31e27b082cf9b293d05b7b2921536597569; expires=Tue, 10-Sep-19 16:39:29 GMT; path=/; domain=.typicode.com; HttpOnly
+X-Powered-By: Express
+Vary: Origin, X-HTTP-Method-Override, Accept-Encoding
+Access-Control-Allow-Credentials: true
+Cache-Control: no-cache
+Pragma: no-cache
+Expires: -1
+Access-Control-Expose-Headers: Location
+Location: http://jsonplaceholder.typicode.com/posts//101
+X-Content-Type-Options: nosniff
+Etag: W/"3c-NR2FmlR+/FamTqYDfidEOwn1FNQ"
+Via: 1.1 vegur
+Expect-CT: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Server: cloudflare
+CF-RAY: 458354b81a541389-LHR
+
+{
+  "title": "Hello",
+  "body": "Hello World",
+  "id": 101
+}
+
+**********************************************
+cmd: curl -x 127.0.0.1:8888 -k -X PUT --data "title=Hello&body=Hello World" https://jsonplaceholder.typicode.com/posts/
+
+PUT https://jsonplaceholder.typicode.com/posts/3 HTTP/1.1
+Host: jsonplaceholder.typicode.com
+User-Agent: curl/7.60.0
+Accept: */*
+Content-Length: 11
+Content-Type: application/x-www-form-urlencoded
+
+title=Hello
+------
+response
+HTTP/1.1 200 OK
+Date: Mon, 10 Sep 2018 16:38:58 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 33
+Connection: keep-alive
+Set-Cookie: __cfduid=d3f35f896042fc7c17ea58e3144fc8eac1536597538; expires=Tue, 10-Sep-19 16:38:58 GMT; path=/; domain=.typicode.com; HttpOnly
+X-Powered-By: Express
+Vary: Origin, Accept-Encoding
+Access-Control-Allow-Credentials: true
+Cache-Control: no-cache
+Pragma: no-cache
+Expires: -1
+X-Content-Type-Options: nosniff
+Etag: W/"21-lmYTLwwbaJlBSqBtlUddNNQWcww"
+Via: 1.1 vegur
+Expect-CT: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Server: cloudflare
+CF-RAY: 458353f808e1bc26-LHR
+
+{
+  "title": "Hello",
+  "id": 3
+}
+
+*************************************************
+
+curl -x 127.0.0.1:8888 -k -X PUT --data "title=Hello&body=Hello World" https://jsonplaceholder.typicode.com/posts/
+request:
+PUT https://jsonplaceholder.typicode.com/posts/ HTTP/1.1
+Host: jsonplaceholder.typicode.com
+User-Agent: curl/7.60.0
+Accept: */*
+Content-Length: 28
+Content-Type: application/x-www-form-urlencoded
+
+title=Hello&body=Hello World
+
+Response:
+
+***************************************
+LATEST::
+========
+
+curl -x 127.0.0.1:8888 -k -X POST -H 'Content-Type: text/csv' -d @data.txt https://jsonplaceholder.typicode.com/posts/
+
+Request:
+
+POST https://jsonplaceholder.typicode.com/posts/ HTTP/1.1
+Host: jsonplaceholder.typicode.com
+User-Agent: curl/7.60.0
+Accept: */*
+Content-Type: text/csv
+Content-Length: 12
+
+Hello World!
+------------
+Response:
+
+HTTP/1.1 201 Created
+Date: Sat, 15 Sep 2018 07:23:30 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 15
+Connection: keep-alive
+Set-Cookie: __cfduid=d086f32a186b7253c07935f8e9e6db6541536996210; expires=Sun, 15-Sep-19 07:23:30 GMT; path=/; domain=.typicode.com; HttpOnly
+X-Powered-By: Express
+Vary: Origin, X-HTTP-Method-Override, Accept-Encoding
+Access-Control-Allow-Credentials: true
+Cache-Control: no-cache
+Pragma: no-cache
+Expires: -1
+Access-Control-Expose-Headers: Location
+Location: http://jsonplaceholder.typicode.com/posts//101
+X-Content-Type-Options: nosniff
+Etag: W/"f-4jjw4Y8q22Yv1PV9m28FczJgjzk"
+Via: 1.1 vegur
+Expect-CT: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Server: cloudflare
+CF-RAY: 45a9592a7a7bbc08-LHR
+
+{
+  "id": 101
+}
+
+***************************************
+
+curl -x 127.0.0.1:8888 -k -X POST -H 'Content-Type: text/csv' -d @data.txt https://jsonplaceholder.typicode.com/posts/test
+
+Request:
+
+POST https://jsonplaceholder.typicode.com/posts/test HTTP/1.1
+Host: jsonplaceholder.typicode.com
+User-Agent: curl/7.60.0
+Accept: */*
+Content-Type: text/csv
+Content-Length: 12
+
+Hello World!
+
+----------
+Response:
+
+HTTP/1.1 404 Not Found
+Date: Sat, 15 Sep 2018 07:25:45 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 2
+Connection: keep-alive
+Set-Cookie: __cfduid=de6f014fc64fb3e73648da09f2fc9be7d1536996345; expires=Sun, 15-Sep-19 07:25:45 GMT; path=/; domain=.typicode.com; HttpOnly
+X-Powered-By: Express
+Vary: Origin, X-HTTP-Method-Override, Accept-Encoding
+Access-Control-Allow-Credentials: true
+Cache-Control: no-cache
+Pragma: no-cache
+Expires: -1
+X-Content-Type-Options: nosniff
+Etag: W/"2-vyGp6PvFo4RvsFtPoIWeCReyIC8"
+Via: 1.1 vegur
+Expect-CT: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Server: cloudflare
+CF-RAY: 45a95c775ac0bc2c-LHR
+
+{}
+
+***************************************
+curl -x 127.0.0.1:8888 -k -X POST -d "key=Hello&value=Hello World!" https://jsonplaceholder.typicode.com/posts/
+
+Request:
+
+POST https://jsonplaceholder.typicode.com/posts/ HTTP/1.1
+Host: jsonplaceholder.typicode.com
+User-Agent: curl/7.60.0
+Accept: */*
+Content-Length: 28
+Content-Type: application/x-www-form-urlencoded
+
+key=Hello&value=Hello World!
+
+-----
+Response:
+
+HTTP/1.1 201 Created
+Date: Sat, 15 Sep 2018 07:45:40 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 60
+Connection: keep-alive
+Set-Cookie: __cfduid=dc7d12563440e8341693e03cc29d3e7ec1536997539; expires=Sun, 15-Sep-19 07:45:39 GMT; path=/; domain=.typicode.com; HttpOnly
+X-Powered-By: Express
+Vary: Origin, X-HTTP-Method-Override, Accept-Encoding
+Access-Control-Allow-Credentials: true
+Cache-Control: no-cache
+Pragma: no-cache
+Expires: -1
+Access-Control-Expose-Headers: Location
+Location: http://jsonplaceholder.typicode.com/posts//101
+X-Content-Type-Options: nosniff
+Etag: W/"3c-iCq+wz4wqimvU8qhHfF/mfhAkgM"
+Via: 1.1 vegur
+Expect-CT: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Server: cloudflare
+CF-RAY: 45a979a06f6c6a07-LHR
+
+{
+  "key": "Hello",
+  "value": "Hello World!",
+  "id": 101
+}
+
+***************************************
+
+curl -x 127.0.0.1:8888 -k -X POST -d "key=Hello&value=Hello World!" https://jsonplaceholder.typicode.com/posts/test
+
+Request:
+
+POST https://jsonplaceholder.typicode.com/posts/test HTTP/1.1
+Host: jsonplaceholder.typicode.com
+User-Agent: curl/7.60.0
+Accept: */*
+Content-Length: 28
+Content-Type: application/x-www-form-urlencoded
+
+key=Hello&value=Hello World!
+
+---------------
+
+Response:
+
+HTTP/1.1 404 Not Found
+Date: Sat, 15 Sep 2018 07:47:20 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 2
+Connection: keep-alive
+Set-Cookie: __cfduid=db290bb2361388047f81f23417c3161671536997640; expires=Sun, 15-Sep-19 07:47:20 GMT; path=/; domain=.typicode.com; HttpOnly
+X-Powered-By: Express
+Vary: Origin, X-HTTP-Method-Override, Accept-Encoding
+Access-Control-Allow-Credentials: true
+Cache-Control: no-cache
+Pragma: no-cache
+Expires: -1
+X-Content-Type-Options: nosniff
+Etag: W/"2-vyGp6PvFo4RvsFtPoIWeCReyIC8"
+Via: 1.1 vegur
+Expect-CT: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Server: cloudflare
+CF-RAY: 45a97c143eb36a01-LHR
+
+{}
+
+
+
+my o/p:
+
+HTTP/1.1 404 Not Found
+Date: Sat, 15 Sep 2018 07:47:20 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 2
+Connection: keep-alive
+Expires: -1
+Server: cloudflare
+
+***************************************
+
+curl -i -X POST  -H 'Content-Type: application/json; charset=utf-8' -d '{"Hello": "Hello World!"}' http://localhost:5555/
+
+curl -i -X GET http://localhost:9000/foo HTTP/1.1 
+ 
+curl -T data.txt localhost:5555
+curl -d @data.txt localhost:5555/post
+
+curl -i -x 127.0.0.1:8888 -k -X GET https://jsonplaceholder.typicode.com/posts/1
+
+Normally however you don't specify the method in the command line, but instead the exact method used depends on the specific options you use. GET is default, using -d or -F makes it a POST, -I generates a HEAD and -T sends a PUT.
