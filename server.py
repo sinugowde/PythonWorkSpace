@@ -123,27 +123,33 @@ class HTTPServer:
         else:
             with open('data.json', 'r') as data_file:
                 json_data = json.load(data_file)
+                print("prepare_post_data:\n{}".format(json_data))
 
         datum = {}
         header = self.request['header']
         message_body = self.request['msgBody']
 
         if 'text/csv' in header['Content-Type'] or 'application/x-www-form-urlencoded' in header['Content-Type']:
-            message_body = message_body.split('&')
-            datum[(message_body[0].split('='))[1]] = (message_body[1].split('='))[1]
-            print("datum: {}\n".format(datum))
-
+            message_body = re.findall(r'([\w\s]+=[\w\s]+)', message_body)
+            if message_body:
+                for i in range(0, len(message_body), 2):
+                    datum[(message_body[i].split('='))[1]] = (message_body[i].split('='))[i+1]
+            else:
+                self.response['status-line'] = (self.request['requestLine'])['http-ver'] + ' 500 Internal Server Error'
         elif 'application/json' in header['Content-Type']:
-            datum = json.loads(message_body)
-            print("message_body1: {}\n".format(datum))
+            try:
+                datum = json.loads(message_body)
+            except:
+                self.response['status-line'] = (self.request['requestLine'])['http-ver'] + ' 500 Internal Server Error'
 
         if datum not in json_data:
             json_data.append(datum)
-
+            with open('data.json', 'w') as data_file:
+                if datum:
+                    json.dump(json_data, data_file, indent=4)
         self.response['general-header'] += '\r\nLocation: http://localhost:5555/' + str(json_data.index(datum)+1)
 
-        with open('data.json', 'w') as data_file:
-            json.dump(json_data, data_file, indent=4)
+
 
         return datum
 

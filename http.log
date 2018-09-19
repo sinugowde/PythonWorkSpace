@@ -278,5 +278,10 @@ curl -T data.txt localhost:5555
 curl -d @data.txt localhost:5555/post
 
 curl -i -x 127.0.0.1:8888 -k -X GET https://jsonplaceholder.typicode.com/posts/1
+curl -i -X POST -H 'Content-Type: text/csv' -d @data.txt http://localhost:5555
+
+curl -i -x 127.0.0.1:8888 -k -X POST -d "key=Hello&value=Hello World!" https://jsonplaceholder.typicode.com/posts/
+curl -i -x 127.0.0.1:8888 -k --data "title=Hello&body=Hello World" http://localhost:5555/post
+
 
 Normally however you don't specify the method in the command line, but instead the exact method used depends on the specific options you use. GET is default, using -d or -F makes it a POST, -I generates a HEAD and -T sends a PUT.
