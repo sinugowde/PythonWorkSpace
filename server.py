@@ -52,7 +52,7 @@ class HTTPServer:
         self.response['general-header'] = 'Date: ' + self.generate_date_time_stamp()
         return self.prepareResponse()
 
-    def check_for_index(self, index):
+    def get_from_index(self, index):
         if os.stat('data.json').st_size == 0:
             json_data = []
         else:
@@ -79,9 +79,9 @@ class HTTPServer:
             self.response['status-line'] += '200 OK'
             self.response['message-body'] = self.web_page()
         elif re.findall(r"/post/\d+", request_line['uri']):
-            self.check_for_index(int((request_line['uri'].strip('/')).split('/')[1]))
+            self.get_from_index(int((request_line['uri'].strip('/')).split('/')[1]))
         elif request_line['uri'] == '/post/' or request_line['uri'] == '/post':
-            self.check_for_index('all')
+            self.get_from_index('all')
         else:
             self.response['status-line'] += '404 NOT FOUND'
         self.response['general-header'] += '\r\nConnection: close'
@@ -108,9 +108,65 @@ class HTTPServer:
         print("response_string: {}\n".format(response_string))
         return response_string
 
+    def put_to_index(self, index):
+        print("put_to_index: index:: {}\n".format(index))
+        if os.stat('data.json').st_size == 0:
+            self.response['status-line'] = (self.request['requestLine'])['http-ver'] + ' 404 Not Found'
+        else:
+            datum = {}
+            with open('data.json', 'r') as data_file:
+                json_data = json.load(data_file)
+
+            print("put_to_index: len: {}\tjson_data:: {}\n".format(len(json_data),json_data))
+            print("put_to_index: json_data_type:: {}\n".format(type(json_data)))
+
+            if (index > 0) and (index <= len(json_data)):
+                message_body = self.request['msgBody']
+                message_body = re.findall(r'([\w\s]+=[\w\s]+)', message_body)
+
+                for i in range(0, len(message_body), 2):
+                    datum[(message_body[i].split('='))[1]] = (message_body[i+1].split('='))[1]
+
+                json_data[index-1] = datum
+                print("put_to_index: json_data:: {}\n".format(json_data))
+
+                with open('data.json', 'w') as data_file:
+                    if datum:
+                        json.dump(json_data, data_file, indent=4)
+                self.response['general-header'] += '\r\nLocation: http://localhost:5555/post/'\
+                                                   + str(json_data.index(datum) + 1)
+                self.response['message-body'] = json.dumps(datum, indent=4)
+                self.response['general-header'] += '\r\nContent-Length: ' + str(len(self.response['message-body']))
+
+            else:
+                self.response['status-line'] = (self.request['requestLine'])['http-ver'] + ' 404 Not Found'
+        return
+
     def parsePut(self):
         print(*"Received PUT request\n")
-        pass
+
+        request_line = self.request['requestLine']
+
+        uri = request_line['uri']
+        print('uri: {}\n'.format(uri))
+        self.response['status-line'] = request_line['http-ver'] + ' '
+        self.response['general-header'] = self.generate_date_time_stamp()
+
+        if re.match(r"/post/\d+", request_line['uri']):
+            print("parsePut-IF: {}".format(request_line['uri']))
+            self.response['status-line'] = (self.request['requestLine'])['http-ver'] + ' 200 OK'
+            self.put_to_index(int((request_line['uri'].strip('/')).split('/')[1]))
+        else:
+            print("parsePut-ELSE: {}".format(request_line['uri']))
+            self.response['status-line'] = (self.request['requestLine'])['http-ver'] + ' 404 Not Found'
+
+        self.response['general-header'] += '\r\nContent-Type: application/json; charset=utf-8'
+        self.response['general-header'] += '\r\nConnection: keep - alive'
+        self.response['general-header'] += '\r\nServer: Aricent Web Server'
+        self.response['general-header'] += '\r\nExpires: -1'
+        print("post_response: {}\n".format(self.response))
+
+        return self.prepareResponse()
 
     def parseHead(self):
         print(*"Received HEAD request\n")
@@ -123,7 +179,6 @@ class HTTPServer:
         else:
             with open('data.json', 'r') as data_file:
                 json_data = json.load(data_file)
-                print("prepare_post_data:\n{}".format(json_data))
 
         datum = {}
         header = self.request['header']
@@ -131,12 +186,10 @@ class HTTPServer:
 
         if 'text/csv' in header['Content-Type'] or 'application/x-www-form-urlencoded' in header['Content-Type']:
             message_body = re.findall(r'([\w\s]+=[\w\s]+)', message_body)
-            print("prepare_post_data:message_body:: {}\n".format(message_body))
 
             if message_body:
                 for i in range(0, len(message_body), 2):
                     datum[(message_body[i].split('='))[1]] = (message_body[i+1].split('='))[1]
-                    print("prepare_post_data:datum[{}]: {}".format(i, datum))
             else:
                 self.response['status-line'] = (self.request['requestLine'])['http-ver'] + ' 500 Internal Server Error'
         elif 'application/json' in header['Content-Type']:
@@ -151,8 +204,6 @@ class HTTPServer:
                 if datum:
                     json.dump(json_data, data_file, indent=4)
         self.response['general-header'] += '\r\nLocation: http://localhost:5555/' + str(json_data.index(datum)+1)
-
-
 
         return datum
 
