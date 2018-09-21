@@ -78,14 +78,17 @@ class HTTPServer:
         if request_line['uri'] == "/":
             self.response['status-line'] += '200 OK'
             self.response['message-body'] = self.web_page()
+            self.response['general-header'] += '\r\nContent-Type: text/html'
         elif re.findall(r"/post/\d+", request_line['uri']):
             self.get_from_index(int((request_line['uri'].strip('/')).split('/')[1]))
+            self.response['general-header'] += '\r\nContent-Type: application/json; charset=utf-8'
         elif request_line['uri'] == '/post/' or request_line['uri'] == '/post':
             self.get_from_index('all')
+            self.response['general-header'] += '\r\nContent-Type: application/json; charset=utf-8'
         else:
             self.response['status-line'] += '404 NOT FOUND'
         self.response['general-header'] += '\r\nConnection: close'
-        self.response['general-header'] += '\r\nContent-Type: text/html'
+
 
         print("Response: {}\n".format(self.response) + '\n')
 
@@ -122,12 +125,30 @@ class HTTPServer:
 
             if (index > 0) and (index <= len(json_data)):
                 message_body = self.request['msgBody']
-                message_body = re.findall(r'([\w\s]+=[\w\s]+)', message_body)
+                header = self.request['header']
 
-                for i in range(0, len(message_body), 2):
-                    datum[(message_body[i].split('='))[1]] = (message_body[i+1].split('='))[1]
+                print("message_body-1: {}".format(message_body))
 
-                json_data[index-1] = datum
+                if 'text/csv' in header['Content-Type'] or \
+                        'application/x-www-form-urlencoded' in header['Content-Type']:
+                    message_body = re.findall(r'([\w\s]+=[\w\s]+)', message_body)
+
+                    if message_body:
+                        for i in range(0, len(message_body), 2):
+                            datum[(message_body[i].split('='))[1]] = (message_body[i + 1].split('='))[1]
+                    else:
+                        self.response['status-line'] = (self.request['requestLine'])[
+                                                           'http-ver'] + ' 500 Internal Server Error'
+                elif 'application/json' in header['Content-Type']:
+                    try:
+                        datum = json.loads(message_body)
+                    except:
+                        self.response['status-line'] = (self.request['requestLine'])[
+                                                           'http-ver'] + ' 500 Internal Server Error'
+                print("message_body-2: {}".format(datum))
+
+                if datum not in json_data:
+                    json_data[index-1] = datum
                 print("put_to_index: json_data:: {}\n".format(json_data))
 
                 with open('data.json', 'w') as data_file:

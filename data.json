@@ -1,11 +1,8 @@
 [
     {
-        "Hello": "Hello World"
+        "bla": "bla-bla-bla"
     },
     {
-        "one": "1"
-    },
-    {
-        "3": "3"
+        "Hi": "Hello World! How are you!"
     }
 ]
