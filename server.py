@@ -131,11 +131,15 @@ class HTTPServer:
 
                 if 'text/csv' in header['Content-Type'] or \
                         'application/x-www-form-urlencoded' in header['Content-Type']:
-                    message_body = re.findall(r'([\w\s]+=[\w\s]+)', message_body)
-
+                    # message_body = re.findall(r'([\w\s]+=[\w\s]+)', message_body)
+                    #
+                    # if message_body:
+                    #     for i in range(0, len(message_body), 2):
+                    #         datum[(message_body[i].split('='))[1]] = (message_body[i + 1].split('='))[1]
+                    message_body = re.findall('[A-Za-z0-9]+=([A-Za-z0-9\s]+)', message_body)
                     if message_body:
                         for i in range(0, len(message_body), 2):
-                            datum[(message_body[i].split('='))[1]] = (message_body[i + 1].split('='))[1]
+                            datum[message_body[i]] = message_body[i+1]
                     else:
                         self.response['status-line'] = (self.request['requestLine'])[
                                                            'http-ver'] + ' 500 Internal Server Error'
@@ -206,11 +210,11 @@ class HTTPServer:
         message_body = self.request['msgBody']
 
         if 'text/csv' in header['Content-Type'] or 'application/x-www-form-urlencoded' in header['Content-Type']:
-            message_body = re.findall(r'([\w\s]+=[\w\s]+)', message_body)
+            message_body = re.findall('[A-Za-z0-9]+=([A-Za-z0-9\s]+)', message_body)
 
             if message_body:
                 for i in range(0, len(message_body), 2):
-                    datum[(message_body[i].split('='))[1]] = (message_body[i+1].split('='))[1]
+                    datum[message_body[i]] = message_body[i + 1]
             else:
                 self.response['status-line'] = (self.request['requestLine'])['http-ver'] + ' 500 Internal Server Error'
         elif 'application/json' in header['Content-Type']:
