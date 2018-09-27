@@ -136,7 +136,7 @@ class HTTPServer:
                     # if message_body:
                     #     for i in range(0, len(message_body), 2):
                     #         datum[(message_body[i].split('='))[1]] = (message_body[i + 1].split('='))[1]
-                    message_body = re.findall('[A-Za-z0-9]+=([A-Za-z0-9\s]+)', message_body)
+                    message_body = re.findall('[\w]+=([\w\s]+)', message_body)
                     if message_body:
                         for i in range(0, len(message_body), 2):
                             datum[message_body[i]] = message_body[i+1]
@@ -210,7 +210,7 @@ class HTTPServer:
         message_body = self.request['msgBody']
 
         if 'text/csv' in header['Content-Type'] or 'application/x-www-form-urlencoded' in header['Content-Type']:
-            message_body = re.findall('[A-Za-z0-9]+=([A-Za-z0-9\s]+)', message_body)
+            message_body = re.findall('[\w]+=([\w\s]+)', message_body)
 
             if message_body:
                 for i in range(0, len(message_body), 2):
@@ -243,7 +243,7 @@ class HTTPServer:
         self.response['status-line'] = request_line['http-ver'] + ' '
         self.response['general-header'] = self.generate_date_time_stamp()
 
-        if uri == '/post':
+        if uri == '/post' and uri == '/post/':
             self.response['status-line'] += '201 Created'
             self.response['message-body'] = json.dumps(self.prepare_post_data(), indent=4)
         else:
