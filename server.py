@@ -6,6 +6,7 @@ from datetime import datetime
 from time import mktime
 import json
 import re
+import os.path
 
 dataFormat = {}
 
@@ -199,6 +200,9 @@ class HTTPServer:
 
     def prepare_post_data(self):
 
+        if not os.path.isfile('data.json'):
+            with open('data.json', 'w') as data_file:
+                pass
         if os.stat('data.json').st_size == 0:
             json_data = []
         else:
@@ -239,11 +243,12 @@ class HTTPServer:
         request_line = self.request['requestLine']
 
         uri = request_line['uri']
-        print('uri: {}\n'.format(uri))
+        print('uri-1: {}\n'.format(uri))
         self.response['status-line'] = request_line['http-ver'] + ' '
         self.response['general-header'] = self.generate_date_time_stamp()
+        print('uri-2: {}\n'.format(uri))
 
-        if uri == '/post' and uri == '/post/':
+        if uri == '/post' or uri == '/post/':
             self.response['status-line'] += '201 Created'
             self.response['message-body'] = json.dumps(self.prepare_post_data(), indent=4)
         else:
@@ -349,4 +354,3 @@ while True:
     print("Connected to: {} : {}\n".format(client_address[0], client_address[1]))
     server = HTTPServer()
     _thread.start_new_thread(threaded_client, (client_connection, server))
-
