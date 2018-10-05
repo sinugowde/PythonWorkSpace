@@ -7,8 +7,10 @@ def get_amazon_price(url):
     result.raise_for_status()
 
     soup = bs4.BeautifulSoup(result.text, features="html5lib")
-    elements = soup.select('#soldByThirdParty > span.a-size-medium.a-color-price.inlineBlock-display.offer-price.'
-                           'a-text-normal.price3P')
+    # elements = soup.select('#soldByThirdParty > span.a-size-medium.a-color-price.inlineBlock-display.offer-price.'
+    #                        'a-text-normal.price3P')
+    elements = soup.select('#result_0 > div > div > div > div.a-fixed-left-grid-col.a-col-right > div:nth-child(4) > div.a-column.a-span7 > div:nth-child(1) > a:nth-child(1) > span.a-size-base.a-color-price.s-price.a-text-bold')
+    
     return elements[0].text.strip()
 
 
