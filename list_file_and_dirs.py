@@ -1,47 +1,50 @@
 import os
 
-# os.chdir('D:\\BITS')
+abs_path = 'D:\\BITS'
+# abs_path = 'C:\\Users\\sgowdex\\Desktop\\iBTW4869_20.100.0.1G'
+tree_dict = {}
 
-#abs_path = 'D:\\BITS'
-abs_path = 'C:\\Users\\sgowdex\\Desktop\\iBTW4869_20.100.0.1G'
 
-# path = {0: os.path.dirname(abs_path)}
-# print(abs_path)
-path = {}
-# i = 1
-first_round = False
+def display_tree():
+    path = []
+    # for item in tree_dict:
+    #     print(item+"\n")
+    base_dir = os.path.basename(abs_path)
+    path.append(base_dir)
+
+    id = 0
+    while True:
+        print(base_dir + '\n')
+        base = tree_dict[base_dir]
+        child = base['children']
+
+        if child.__len__():
+            base_dir = child[id]
+            node = base_dir + '-' + str(id)
+            if node is path[-1]:
+
+            else:
+                path.append(node)
+
+    return
+
+
+started = False
 for basedir, subdir, files in os.walk(abs_path):
-    # base_dir = os.path.basename(basedir)
-    base_dir = basedir.split('\\')[-1]
-    parent = basedir.split('\\')[-2]
-
-    print("parent: {}, base_dir: {}, subdir: {}, files: {}\n".format(parent, base_dir, subdir, files))
-
-    if (first_round is True) and (subdir != []):
-        for item in our_dict:
-            if base_dir in item:
-                for key in subdir:
-                    item[base_dir].append({key: []})
-                item[base_dir].append({'files': files})
-        print("item: {}\n".format(item))
-        # print("path-2: {}\n".format(path))
-        # break
+    # print("basedir: {}, subdir: {}, files: {}".format(basedir, subdir, files))
+    if not started:
+        temp_dict = {'root': True}
+        started = True
     else:
-        our_dict = {}
-        path[base_dir] = []
-        path[base_dir].append([parent, base_dir])
-        path[base_dir].append({'files': files})
+        temp_dict = {'root': False}
 
-        for item in subdir:
-            # print("item: {}\n".format(item))
-            # print("path: {}\n".format(path[base_dir]))
-            path[base_dir].append({item: []})
-        # pass
-    print("path-1: {}\n".format(path))
-    first_round = True
-    our_dict = path[base_dir]
-    print("our_dict: {}\n".format(our_dict))
-    parent_dir = base_dir
-    base_dir = ''
+    temp_dict['parent'] = os.path.dirname(basedir)
+    temp_dict['children'] = subdir
+    temp_dict['files'] = files
+    tree_dict[os.path.basename(basedir)] = temp_dict
+    temp_dict = None
+
+print("\ntree_dict: {}".format(tree_dict))
+display_tree()
 
 

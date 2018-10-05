@@ -1,0 +1,1 @@
+@py.exe D:\PythonWorkSpace\PP_webbrowser.py %*
