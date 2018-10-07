@@ -3,18 +3,19 @@ from bs4 import BeautifulSoup
 import re
 
 amazon_home_page = 'https://www.amazon.in'
-my_url = 'https://www.amazon.in/s/ref=nb_sb_ss_c_1_6?url=search-alias%3Daps&field-keywords='
+amazon_book_search = 'https://www.amazon.in/s/ref=nb_sb_noss_1?url=search-alias%3Dstripbooks&field-keywords='
+amazon_general_search = 'https://www.amazon.in/s/ref=nb_sb_ss_c_1_6?url=search-alias%3Daps&field-keywords='
 book_to_search = "Python Programming"
-page_2 = '/Python-Programming/s?ie=UTF8&amp;page=2&amp;rh=i%3Aaps%2Ck%3APython%20Programming'
-url = 'https://www.amazon.in/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=Python+Programming'
+# page_2 = '/Python-Programming/s?ie=UTF8&amp;page=2&amp;rh=i%3Aaps%2Ck%3APython%20Programming'
+# url = 'https://www.amazon.in/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=Python+Programming'
 
 file_name = 'amazon_books.csv'
 file_handle = open(file_name, 'w')
 csv_header = 'Sl No, Book Title, Author, Price\n'
 file_handle.write(csv_header)
 
-# my_client = urlopen(my_url + book_to_search)
-my_client = urlopen(url)
+my_client = urlopen(amazon_book_search + book_to_search.replace(' ', '+'))
+# my_client = urlopen(url)
 page_html = my_client.read()
 my_client.close()
 
@@ -40,6 +41,7 @@ for page_num in range(1, search_pages + 1):
         if container_book:
             if container.h2.text:
                 book_title = container.h2.text
+                book_title = (book_title.encode('ascii', 'ignore')).decode("utf-8")
             else:
                 book_title = 'NA'
 
@@ -56,8 +58,10 @@ for page_num in range(1, search_pages + 1):
 
             book_price = 'NA'
             container_price = container_book[0].find_all('span', class_="a-size-base a-color-price s-price a-text-bold")
-            if container_price:
-                book_price = container_price[0].text.strip()
+            if len(container_price) >= 1:
+                book_price = (container_price[0].text.strip()).replace(',', '')
+                if (len(container_price) >= 2) and (float(book_price) == 0):
+                    book_price = (container_price[1].text.strip()).replace(',', '')
 
             print("{}. book_title: {}, book_author: {}, book_price: Rs.{}/-".format(search_results, book_title,
                                                                                     book_author, book_price))
