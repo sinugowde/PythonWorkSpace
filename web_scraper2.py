@@ -3,7 +3,8 @@ from bs4 import BeautifulSoup
 import re
 
 my_url = 'https://www.amazon.in/s/ref=nb_sb_ss_c_1_6?url=search-alias%3Daps&field-keywords='
-book_to_search = "Python Programming"
+# book_to_search = "Python Programming"
+book_to_search = input("Enter your choice of book: ")
 url = 'https://www.amazon.in/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=Python+Programming'
 
 file_name = 'amazon_books.csv'
@@ -11,8 +12,8 @@ file_handle = open(file_name, 'w')
 csv_header = 'Sl No, Book Title, Author, Price\n'
 file_handle.write(csv_header)
 
-# my_client = urlopen(my_url + book_to_search)
-my_client = urlopen(url)
+my_client = urlopen(my_url + book_to_search.replace(' ', '+'))
+# my_client = urlopen(url)
 page_html = my_client.read()
 my_client.close()
 
