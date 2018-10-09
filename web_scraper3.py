@@ -11,7 +11,7 @@ book_to_search = "Python Programming"
 
 file_name = 'amazon_books.csv'
 file_handle = open(file_name, 'w')
-csv_header = 'Sl No, Book Title, Author, Price, Rating\n'
+csv_header = 'Sl No, Book Title, Author, Price, Rating, No of Ratings\n'
 file_handle.write(csv_header)
 
 my_client = urlopen(amazon_book_search + book_to_search.replace(' ', '+'))
@@ -65,26 +65,36 @@ for page_num in range(1, search_pages + 1):
                 if (len(container_price) >= 2) and (float(book_price) == 0):
                     book_price = (container_price[1].text.strip()).replace(',', '')
 
-            # Finding Book Rating in the Amazon site
+            # Finding Book Rating & the number of given Ratings in the Amazon site
             book_rate = 'Not Rated'
+            book_rating_num = 'Not Rated'
             container_rating = container.find('span', class_="a-declarative")
 
             if container_rating:
                 rating_text = container_rating.text
 
                 if rating_text:
-                    book_rate = re.findall('(\d\.?\d*) out of 5 stars', rating_text)[0]
+                    rating_text = re.findall('(\d\.?\d*) out of 5 stars', rating_text)
+                    if rating_text:
+                        book_rate = rating_text[0]
+
+                        container_book_rating_num = container.find_all('div', class_="a-column a-span5 a-span-last")
+                        if container_book_rating_num:
+                            container_book_rating_num = \
+                                container_book_rating_num[0].find_all('a',
+                                                                      class_="a-size-small a-link-normal a-text-normal")
+
+                            if container_book_rating_num:
+                                book_rating_num = container_book_rating_num[0].text
 
             # Printing the data to the python console
-            print("{}. book_title: {}, book_author: {}, book_price: Rs.{}/-, book_rating: {}".format(search_results,
-                                                                                                     book_title,
-                                                                                                     book_author,
-                                                                                                     book_price,
-                                                                                                     book_rate))
+            print("{}. book_title: {}, book_author: {}, book_price: Rs.{}/-, book_rating: {}, book_rating_num: {}"
+                  .format(search_results, book_title, book_author, book_price, book_rate, book_rating_num))
 
             # Printing the data to the amazon_books.csv file
             file_handle.write(str(search_results) + ',' + book_title.replace(',', '|') + ',' +
-                              book_author.replace(',', '') + ',' + book_price.replace(',', '') + ',' + book_rate + '\n')
+                              book_author.replace(',', '') + ',' + book_price.replace(',', '') + ',' + book_rate + ','
+                              + book_rating_num + '\n')
 
     # Searching for "Next Page" link in the search results
     container_search_string = page_soup.find('a', class_="pagnNext")
