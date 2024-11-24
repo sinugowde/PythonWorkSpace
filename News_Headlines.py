@@ -7,8 +7,8 @@ import time
 # Function to fetch news from a website
 def fetch_news():
     # url = "https://www.livemint.com/latest-news"  # Replace with the desired news site's URL
-    # url = "https://www.thehindu.com/news/national"  # Not working
-    url = "https://timesofindia.indiatimes.com/home/headlines"  # Not working
+    url = "https://www.thehindu.com/news/national"  # Not working
+    # url = "https://timesofindia.indiatimes.com/home/headlines"  # Not working
     headers = {"User-Agent": "Mozilla/5.0"}
 
     response = requests.get(url, headers=headers)

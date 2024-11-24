@@ -1,3 +1,6 @@
+# pip install aiohttp
+# pip install aiofiles
+
 import aiohttp
 import asyncio
 import aiofiles
