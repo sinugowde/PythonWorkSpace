@@ -1,7 +1,6 @@
 import os
 
-abs_path = 'D:\\BITS'
-# abs_path = 'C:\\Users\\sgowdex\\Desktop\\iBTW4869_20.100.0.1G'
+abs_path = r'D:\Samanvay'
 tree_dict = {}
 
 
@@ -22,7 +21,7 @@ def display_tree():
             base_dir = child[id]
             node = base_dir + '-' + str(id)
             if node is path[-1]:
-
+                break
             else:
                 path.append(node)
 
@@ -45,6 +44,6 @@ for basedir, subdir, files in os.walk(abs_path):
     temp_dict = None
 
 print("\ntree_dict: {}".format(tree_dict))
-display_tree()
+
 
 
